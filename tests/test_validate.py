@@ -37,23 +37,31 @@ def test_get_filestorage_size():
 
     with SpooledTemporaryFile() as temp:
         temp.write(b"".ljust(0))
+        init_pos = temp.tell()
         rv = validate._get_filestorage_size(FileStorage(temp))
         assert rv == 0
+        assert temp.tell() == init_pos
 
     with SpooledTemporaryFile() as temp:
         temp.write(b"".ljust(123))
+        init_pos = temp.tell()
         rv = validate._get_filestorage_size(FileStorage(temp))
         assert rv == 123
+        assert temp.tell() == init_pos
 
     with SpooledTemporaryFile() as temp:
         temp.write(b"".ljust(1024))
+        init_pos = temp.tell()
         rv = validate._get_filestorage_size(FileStorage(temp))
         assert rv == 1024
+        assert temp.tell() == init_pos
 
     with SpooledTemporaryFile() as temp:
         temp.write(b"".ljust(1234))
+        init_pos = temp.tell()
         rv = validate._get_filestorage_size(FileStorage(temp))
         assert rv == 1234
+        assert temp.tell() == init_pos
 
 
 @pytest.mark.parametrize("size", ["wrong_format", "1.2.3 MiB"])

@@ -7,11 +7,9 @@ Custom validation classes for various types of data.
 
 from __future__ import annotations
 
-import io
 import os
 import re
 import typing
-from tempfile import SpooledTemporaryFile
 
 from marshmallow.exceptions import ValidationError
 from marshmallow.validate import Validator as Validator
@@ -21,15 +19,12 @@ from werkzeug.datastructures import FileStorage
 def _get_filestorage_size(file: FileStorage) -> int:
     """Return the size of the FileStorage object in bytes."""
     stream = file.stream
-    if isinstance(stream, io.BytesIO):
-        return stream.getbuffer().nbytes
-
-    if isinstance(stream, SpooledTemporaryFile):
-        return os.stat(stream.fileno()).st_size
-
-    size = len(file.read())
-    file.stream.seek(0)
-    return size
+    init_pos = stream.tell()
+    try:
+        stream.seek(0, os.SEEK_END)
+        return stream.tell()
+    finally:
+        stream.seek(init_pos, os.SEEK_SET)
 
 
 # This function is copied from loguru with few modifications.
